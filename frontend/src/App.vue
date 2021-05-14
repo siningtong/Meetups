@@ -26,8 +26,8 @@
       ></v-app-bar-nav-icon>
       <v-toolbar-title>
         <router-link to="/" tag="span" style="cursor: pointer"
-          >Meetups</router-link
-        >
+          >Meetups
+        </router-link>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-xs-only">
@@ -36,7 +36,6 @@
           small
           v-for="item in menuItems"
           :key="item.title"
-          router
           :to="item.link"
         >
           <v-icon left>{{ item.icon }}</v-icon>
@@ -46,14 +45,13 @@
     </v-app-bar>
 
     <v-main>
-      <v-container class="fill-height" fluid>
-        <v-row align="center" justify="center"> </v-row>
-      </v-container>
+      <router-view></router-view>
     </v-main>
     <v-footer color="teal" app>
-      <span class="white--text">&copy; {{ new Date().getFullYear() }}</span>
+      <span class="white--text"
+        >&copy; {{ new Date().getFullYear() }} Napoleon</span
+      >
     </v-footer>
-    <router-view></router-view>
   </v-app>
 </template>
 
@@ -66,22 +64,41 @@ export default Vue.extend({
   components: {},
 
   data: () => ({
-    drawer: false,
-    menuItems: [
-      {
-        icon: "mdi-account-supervisor",
-        title: "View Meetups",
-        link: "/meetups"
-      },
-      {
-        icon: "mdi-head-plus-outline",
-        title: "Organize Meetups",
-        link: "/meetups/new"
-      },
-      { icon: "mdi-account-circle", title: "Profile", link: "/profile" },
-      { icon: "mdi-face", title: "Sign Up", link: "/register" },
-      { icon: "mdi-lock-open", title: "Sign In", link: "/signin" }
-    ]
-  })
+    drawer: false
+  }),
+  computed: {
+    auth() {
+      return this.$store.getters.isAuthenticated;
+    },
+    menuItems() {
+      let menuItems = [
+        {
+          icon: "mdi-account-supervisor",
+          title: "View Meetups",
+          link: "/meetups"
+        }
+      ];
+      if (this.auth) {
+        menuItems.push(
+          {
+            icon: "mdi-head-plus-outline",
+            title: "Organize Meetups",
+            link: "/create"
+          },
+          { icon: "mdi-account-circle", title: "Profile", link: "/profile" },
+          { icon: "mdi-lock-open", title: "Logout", link: "/logout" }
+        );
+      } else {
+        menuItems.push(
+          { icon: "mdi-face", title: "Sign Up", link: "/register" },
+          { icon: "mdi-lock-open", title: "Login", link: "/login" }
+        );
+      }
+      return menuItems;
+    }
+  },
+  created() {
+    this.$store.dispatch("tryAutoLogin");
+  }
 });
 </script>
