@@ -11,29 +11,29 @@ export default new Vuex.Store({
     token: null,
     userId: null,
     loadedMeetups: [
-      {
-        imageUrl:
-          "https://lp-cms-production.imgix.net/2019-06/27860479.jpg?auto=compress&fit=crop&fm=auto&sharp=10&vib=20&w=1200&h=800",
-        id: "123",
-        title: "Meetup in New York",
-        date: "2017-07-31",
-        location: "New York",
-        description: "The best meetup in America"
-      },
-      {
-        imageUrl:
-          "https://www.china-briefing.com/news/wp-content/uploads/2019/04/China-Briefing-Shanghai-Industry-Economics-and-Policy.jpg",
-        id: "456",
-        title: "Meetup in China",
-        date: "2018-04-31"
-      },
-      {
-        imageUrl:
-          "https://static01.nyt.com/images/2020/05/10/nyregion/00nyvirus-reopen-timessquare/00nyvirus-reopen101-mobileMasterAt3x.jpg",
-        id: "789",
-        title: "Meetup in Canada",
-        date: "2020-07-12"
-      }
+      // {
+      //   imageUrl:
+      //     "https://lp-cms-production.imgix.net/2019-06/27860479.jpg?auto=compress&fit=crop&fm=auto&sharp=10&vib=20&w=1200&h=800",
+      //   id: "123",
+      //   title: "Meetup in New York",
+      //   date: "2017-07-31",
+      //   location: "New York",
+      //   description: "The best meetup in America"
+      // },
+      // {
+      //   imageUrl:
+      //     "https://www.china-briefing.com/news/wp-content/uploads/2019/04/China-Briefing-Shanghai-Industry-Economics-and-Policy.jpg",
+      //   id: "456",
+      //   title: "Meetup in China",
+      //   date: "2018-04-31"
+      // },
+      // {
+      //   imageUrl:
+      //     "https://static01.nyt.com/images/2020/05/10/nyregion/00nyvirus-reopen-timessquare/00nyvirus-reopen101-mobileMasterAt3x.jpg",
+      //   id: "789",
+      //   title: "Meetup in Canada",
+      //   date: "2020-07-12"
+      // }
     ]
   },
   mutations: {
@@ -43,6 +43,9 @@ export default new Vuex.Store({
     },
     createMeetup(state, payload) {
       state.loadedMeetups.push(payload);
+    },
+    loadMeetups(state, payload) {
+      state.loadedMeetups = payload;
     },
     logout(state) {
       state.token = null;
@@ -56,7 +59,7 @@ export default new Vuex.Store({
         commit("logout");
       }, expiration);
     },
-    signUp({ commit }, playload) {
+    signUp(playload) {
       axios
         .post("http://localhost:3000/user/register", {
           playload
@@ -81,16 +84,19 @@ export default new Vuex.Store({
           if (user) {
             commit("authUser", {
               token: user,
+              //@ts-ignore
               userId: jwt.decode(user).user._id
             });
             const now = new Date().getTime();
             const exp =
+              //@ts-ignore
               jwt.decode(response.data).exp - jwt.decode(response.data).iat;
             const expirationDate = new Date(now + exp * 1000);
             localStorage.setItem("token", user);
+            //@ts-ignore
             localStorage.setItem("userId", jwt.decode(user).user._id);
+            //@ts-ignore
             localStorage.setItem("expirationDate", expirationDate);
-
             dispatch("setLogoutTimer", exp * 1000);
           }
         })
@@ -108,6 +114,7 @@ export default new Vuex.Store({
       }
       const expirationDate = localStorage.getItem("expirationDate");
       const now = new Date();
+      //@ts-ignore
       if (now >= expirationDate) {
         return;
       }
@@ -126,6 +133,12 @@ export default new Vuex.Store({
       //reach to database and store it and get id
       commit("createMeetup", meetup);
     },
+    loadMeetups({ commit }) {
+      axios.get("http://localhost:3000/meetups").then((response) => {
+        commit("loadMeetups", response.data);
+        console.log("meetups", response);
+      });
+    },
     logout({ commit }) {
       localStorage.clear();
       commit("logout");
@@ -134,6 +147,7 @@ export default new Vuex.Store({
   modules: {},
   getters: {
     loadedMeetups(state) {
+      //@ts-ignore
       return state.loadedMeetups.sort((meetupA, meetupB) => {
         return meetupA.date > meetupB.date;
       });

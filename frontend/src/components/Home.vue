@@ -48,6 +48,9 @@ export default {
     onLoadMeetup(id) {
       this.$router.push("/meetups/" + id);
     }
+  },
+  created() {
+    this.$store.dispatch("loadMeetups");
   }
 };
 </script>

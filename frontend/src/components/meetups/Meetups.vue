@@ -39,7 +39,7 @@ export default {
   },
   methods: {},
   created() {
-    console.log(this.$store.getters.loadedMeetups);
+    this.$store.dispatch("loadMeetups");
   }
 };
 </script>
